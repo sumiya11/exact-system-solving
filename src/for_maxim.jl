@@ -25,11 +25,15 @@ using AbstractAlgebra
 # Descriprion for the function below.
 # Suppose we have a float number `y` we want to convert to rational.
 # It is well known there exists no rational number closest to `y`.
-# However, one may consider the class of rationals with denominators bound by integer `M`.
-# This class *contains a rational, closest to `y`*.
-# Moreover, if there exist a suitable rational approximating `y`, it is *unique*,
-# and there exists a logarithmic algorithm for finding the one.
 #
+# However, one may consider the class of rationals with denominators bound by integer `M`.
+# This class *contains a rational, closest to `y`* w.r.t each other rational in the class.
+# Moreover, if there exist a suitable rational with bound denominator approximating `y`,
+# it is *unique*, and there exists a logarithmic algorithm for finding the one.
+#
+# function `float_reconstruction` implements this algorithm.
+# Intrinsically, the algorithm consists of performing some iterations of
+# Extended Euclidean Algorithm for numbers `y` and `1`
 
 # for the given float `y` and natural `M`
 # computes rational fraction `p/q` approximating `y` such that
@@ -38,9 +42,12 @@ using AbstractAlgebra
 #   q ≤ M
 # i.e the fraction `p/q` with the simplest denominator closest to `y`
 function float_reconstruction(y::T, M) where {T<:AbstractFloat}
-    # the function implements algorithm derived from Corollary 6.3a
-    # in Theory of Linear and Integer Programming, Schrijver, 1986,
+    # the function implements algorithm derived from Corollary 6.3a of
+    #   Theory of Linear and Integer Programming, Schrijver, 1986,
     # the notation is taken from there
+    #
+    # note that no formal correctness proof of this
+    # particular implementation was carried out
 
     ε = eps(T)
 
