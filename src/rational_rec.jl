@@ -9,6 +9,22 @@ using Primes
 
 include("utils.jl")
 
+function lol(a, m)
+    bnd = sqrt(float(m) / 2)
+
+    U = [1, 0, m]
+    V = [0, 1, a]
+    while abs(V[3]) >= bnd
+        @info "" U V
+        q = div(U[3], V[3])
+        T = U .- q .* V
+        U = V
+        V = T
+    end
+    @info "" U V
+
+end
+
 #------------------------------------------------------------------------------
 
 # rational number reconstruction implementation borrowed from CLUE
@@ -43,6 +59,7 @@ function rational_reconstruction(a::I, m::J) where {I<:Union{Int, BigInt}, J<:Un
         V = T
     end
 
+
     t = abs(V[2])
     r = V[3] * sign(V[2])
     # changed from `<= bnd` to `<= m / bnd`
@@ -67,6 +84,16 @@ function modular_reduction(x, field)
     n // d
 end
 
+function modular_reduction(x::Array, field)
+    y = zeros(field, size(x)...)
+    for i in 1:size(x, 1)
+        for j in 1:size(x, 2)
+            y[i, j] = modular_reduction(x[i, j], field)
+        end
+    end
+    y
+end
+
 function modular_reduction(x::Int, field)
     field(x)
 end
@@ -77,11 +104,11 @@ function solve_exact_dixon(A, b)
     n = size(A, 1)
 
     # prime p, such that it does not divide det(A)
-    p = 2^31 - 1
+    p = 5
 
     @assert mod(det(A), p) != 0
 
-    F = GF(p)
+    F = Nemo.GF(p)
 
     MSpace = MatrixSpace(F, n, n)
     VSpace = MatrixSpace(F, n, 1)
@@ -95,12 +122,11 @@ function solve_exact_dixon(A, b)
     d = b
 
     i = 0
-
     while BigInt(p)^i < B
         y = Ainv * VSpace(d)                # solve mod p
         ybig = (x->BigInt(x.data)).(Array(y))
         x̂ += ybig * BigInt(p)^i                    # add new digit
-        d = Int.((d - A*ybig) / p)         # update residue
+        d = BigInt.((d - A*ybig) / p)         # update residue
         i += 1
     end
 
@@ -112,17 +138,17 @@ function solve_in_reals(A, b)
 end
 
 function solve_exact_naive(A, b)
-    A \ b
+    Rational.(A) \ Rational.(b)
 end
 
-function solve_exact_reduce(A, b)
+function solve_exact_modular(A, b)
     n = size(A, 1)
 
     # upper bound for denominators of x
     B = 2*BigFloat(norm(A, 2))^(2n - 1) * norm(b, 2)
     p = Nemo.ZZ(nextprime(ceil(BigInt, B)))
 
-    F = GF(p)
+    F = Nemo.GF(p)
     MSpace = MatrixSpace(F, n, n)
     VSpace = MatrixSpace(F, n, 1)
     Ar = MSpace(A)

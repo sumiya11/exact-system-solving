@@ -15,3 +15,12 @@ end
 function bitsize(x::AbstractArray)
     maximum(bitsize, x)
 end
+
+
+function coo2matrix(n, m, COO)
+    A = zeros(Rational, n, m)
+    for (i, j, x) in COO
+        A[i, j] = x
+    end
+    A
+end
