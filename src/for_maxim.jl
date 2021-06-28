@@ -81,6 +81,7 @@ end
 
 a = 4 / 3  # this sets a to 1.33..
 b = float_reconstruction(a, 10)
+# b is of type Rational here, x/y - float div , x//y - rational div
 @assert b == 4 // 3  # b is a rational exactly equal to 4 // 3
 
 #------------------------------------------------------------------------------
@@ -126,5 +127,7 @@ A = [
 # λ = 2.1428571427228059...
 λ, x = power_iteration(A)
 
+# λ_true is of type Rational here
 λ_true = float_reconstruction(λ, 100)
 @assert λ_true == 15//7
+
